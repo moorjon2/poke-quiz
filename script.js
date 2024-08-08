@@ -2,8 +2,11 @@ const firstMessage = document.querySelector(".firstMessage");
 const secondMessage = document.querySelector(".secondMessage");
 const thirdMessage = document.querySelector(".thirdMessage");
 const mainContainer = document.getElementById("main-nes-container");
-const startButton = document.getElementById('startButton');
+const answerContainer = document.querySelector(".answerContainer")
+const startButtonContainer = document.querySelector(".startButtonContainer");
+const startButton = document.querySelector('.startButton');
 const aButton = document.getElementById("myAudio");
+const audioTheme = document.getElementById("endTheme");
 
 secondMessage.classList.add("hidden");
 thirdMessage.classList.add("hidden");
@@ -84,6 +87,10 @@ const playAButtonSound = () => {
     aButton.play();
 }
 
+const playEndTheme = () => {
+    audioTheme.play();
+}
+
 const pickPokemon = () => {
     const pickRandomPokemon = pokemonAndType[Math.floor(Math.random() * pokemonAndType.length)];
     mainContainer.innerHTML = `
@@ -95,7 +102,71 @@ const pickPokemon = () => {
             <img src="${pickRandomPokemon.image}" style="max-width: 50%; height: 50%;"/>
         </div>
     `
+    startButtonContainer.innerHTML = `
+        <button type="button" class="nes-btn is-primary">Restart</button>
+    `;
 }
+
+let currentQuestion = 0;
+
+const questionsShow = () => {
+    renderQuestion();
+    
+    // Render the "Next" button
+    startButtonContainer.style.display = 'flex';
+    startButtonContainer.style.justifyContent = 'flex-end';
+    startButtonContainer.innerHTML = `
+        <button id="nextButton" type="button" class="nes-btn is-primary">Next</button>
+    `;
+    
+    const nextButton = document.getElementById('nextButton');
+    nextButton.addEventListener('click', () => {
+        playAButtonSound();
+        currentQuestion++;
+        if (currentQuestion < questions.length) {
+            renderQuestion();
+        } else {
+            playEndTheme();
+            answerContainer.classList.add("hidden");
+            pickPokemon();
+        }
+    });
+};
+
+// Function to render the current question and answer options
+const renderQuestion = () => {
+    const questionToShow = questions[currentQuestion];
+    
+    mainContainer.innerHTML = `
+        <p class="title">Q: ${currentQuestion + 1}/${questions.length}</p>
+        <p>${questionToShow}</p>
+    `;
+    
+    answerContainer.innerHTML = `
+        <div id="questionsSelection" class="nes-container">
+            <label>
+                <input type="radio" class="nes-radio" name="answer" />
+                <span>Never</span>
+            </label>
+            <label>
+                <input type="radio" class="nes-radio" name="answer" />
+                <span>Rarely</span>
+            </label>
+            <label>
+                <input type="radio" class="nes-radio" name="answer" />
+                <span>Sometimes</span>
+            </label>
+            <label>
+                <input type="radio" class="nes-radio" name="answer" />
+                <span>Often</span>
+            </label>
+            <label>
+                <input type="radio" class="nes-radio" name="answer" />
+                <span>Always</span>
+            </label>
+        </div>
+    `;
+};
 
 mainContainer.addEventListener('click', () => {
     if (counter <= 1) {
@@ -114,6 +185,13 @@ mainContainer.addEventListener('click', () => {
 })
 
 startButton.addEventListener('click', () => {
+    startButtonContainer.innerHTML = ``;
     playAButtonSound();
-    pickPokemon();
+    questionsShow();
 })
+
+document.querySelectorAll('input[type="radio"]').forEach(radio => {
+    radio.addEventListener('mouseover', () => {
+        radio.checked = true;
+    });
+});
